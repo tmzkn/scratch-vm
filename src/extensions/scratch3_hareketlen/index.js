@@ -25,38 +25,37 @@ class Scratch3Hareketlen {
 
     onProjectStart = () => {
         log.log('project started');
-        this.lastSampling = {};
-        this.labels = new Set();
-        this.session = {
-            startedAt: new Date(),
-            data: [],
-            labels: []
-        };
-        this.intervalId = setInterval(() => {
-            const data = {...this.lastSampling, date: new Date()};
-            this.session.data.push(data);
-            Object.keys(this.lastSampling).forEach(label =>
-                this.labels.add(label)
-            );
-        }, 1000 / this.samplingFreq);
     };
 
     onProjectStop = () => {
         log.log('project stoped');
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-            this.session.endedAt = new Date();
-            this.session.labels = Array.from(this.labels.values());
-            const path = `users/${this.userId[1]}/playData/${this.gameId[1]}/sessions`;
-            this.firebase.db.collection(path).add(this.session);
-        }
     };
 
     getInfo = () => ({
         id: 'hareketlen',
         name: 'Hareketlen',
         blocks: [
+            {
+                opcode: 'startSampling',
+                blockType: BlockType.COMMAND,
+                text: 'veri kaydetmeye basla'
+            },
+            {
+                opcode: 'stopSamplingAndSave',
+                blockType: BlockType.COMMAND,
+                text: 'veri kaydetmeyi bitir'
+            },
+            {
+                opcode: 'setSamplingFreq',
+                blockType: BlockType.COMMAND,
+                text: 'saniyede [FREQ] kez veri kaydet',
+                arguments: {
+                    FREQ: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 1
+                    }
+                }
+            },
             {
                 opcode: 'sample',
                 blockType: BlockType.COMMAND,
@@ -76,10 +75,49 @@ class Scratch3Hareketlen {
         menus: {}
     });
 
+    startSampling = () => {
+        this.lastSampling = {};
+        this.labels = new Set();
+        this.session = {
+            startedAt: new Date(),
+            data: [],
+            labels: []
+        };
+        this.intervalId = setInterval(() => {
+            const data = {...this.lastSampling, date: new Date()};
+            this.session.data.push(data);
+            Object.keys(this.lastSampling).forEach(label =>
+                this.labels.add(label)
+            );
+        }, 1000 / this.samplingFreq);
+    };
+
+    stopSamplingAndSave = () => {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+            this.session.endedAt = new Date();
+            this.session.labels = Array.from(this.labels.values());
+            const path = `users/${this.userId[1]}/playData/${this.gameId[1]}/sessions`;
+            this.firebase.db.collection(path).add(this.session);
+        }
+    };
+
+    setSamplingFreq = args => {
+        const freq = Cast.toNumber(args.FREQ);
+        this.samplingFreq = freq;
+    };
+
     sample = args => {
+        if (!this.intervalId) {
+            // eslint-disable-next-line no-alert
+            alert(
+                'Veri kaydetmek icin "veri kaydetmeye basla" ve "veri kaydetmeyi bitir" bloklarini kullanmalisiniz.'
+            );
+            return;
+        }
         const label = args.LABEL;
         const value = Cast.toNumber(args.VALUE);
-        log.log(label, value);
         this.lastSampling[label] = value;
     };
 }
