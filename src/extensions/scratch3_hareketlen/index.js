@@ -98,8 +98,11 @@ class Scratch3Hareketlen {
             this.intervalId = null;
             this.session.endedAt = new Date();
             this.session.labels = Array.from(this.labels.values());
-            const path = `users/${this.userId[1]}/playData/${this.gameId[1]}/sessions`;
-            this.firebase.db.collection(path).add(this.session);
+            const userRef = this.firebase.db.doc(`users/${this.userId[1]}`);
+            const gameRef = this.firebase.db.doc(`games/${this.gameId[1]}`);
+            this.session.user = userRef;
+            this.session.game = gameRef;
+            this.firebase.db.collection('sessions').add(this.session);
         }
     };
 
