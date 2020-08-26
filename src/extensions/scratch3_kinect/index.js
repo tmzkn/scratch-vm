@@ -78,7 +78,6 @@ class Kinect2Scratch3 {
         this._onMessage = this._onMessage.bind(this);
         this._onClose = this._onClose.bind(this);
         this._onError = this._onError.bind(this);
-        this.disconnect = this.disconnect.bind(this);
     }
 
     scan () {
