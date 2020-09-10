@@ -78,6 +78,9 @@ class Kinect2Scratch3 {
         this._onMessage = this._onMessage.bind(this);
         this._onClose = this._onClose.bind(this);
         this._onError = this._onError.bind(this);
+
+        // try to connect directly
+        this.connect('kinect');
     }
 
     scan () {
@@ -247,7 +250,7 @@ class Scratch3Kinect {
                 },
                 {
                     opcode: 'whenPersonExit',
-                    text: 'ekrandan bir kisi cikti',
+                    text: 'ekrandan bir kisi ciktiginda',
                     blockType: BlockType.HAT
                 },
                 {
